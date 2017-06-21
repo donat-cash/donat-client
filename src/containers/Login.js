@@ -7,12 +7,14 @@ import {
 import { withRouter } from 'react-router-dom';
 
 import config from '../config.js';
+import LoaderButton from '../components/LoaderButton';
 
 class Login extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
+      isLoading: false,
       username: '',
       password: '',
     };
@@ -32,6 +34,10 @@ class Login extends Component {
   handleSubmit = async (event) => {
     event.preventDefault();
 
+    this.setState({
+      isLoading: true
+    });
+
     try {
       const userToken = await this.login(this.state.username, this.state.password);
 
@@ -39,7 +45,11 @@ class Login extends Component {
       this.props.history.push('/');
     }
     catch(e) {
-      alert(e);
+      console.error(e);
+
+      this.setState({
+        isLoading: false
+      });
     }
   }
 
@@ -86,11 +96,12 @@ class Login extends Component {
           value={this.state.password}
           onChange={this.handleChange} />
 
-        <button
-          disabled={ ! this.validateForm() }
-          type="submit">
-          Login
-        </button>
+        <LoaderButton
+          disabled={!this.validateForm()}
+          type="submit"
+          isLoading={this.state.isLoading}
+          text="Login"
+          loadingText="Logging in…" />
       </form>
     );
   }
