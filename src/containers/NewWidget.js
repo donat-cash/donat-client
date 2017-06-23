@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import {
+  invokeApig,
+  s3Upload,
+} from '../libs/awsLib';
 import config from '../config.js';
 import LoaderButton from '../components/LoaderButton';
-import { invokeApig, s3Upload } from '../libs/awsLib';
 
 class NewWidget extends Component {
   constructor(props) {
@@ -21,28 +24,31 @@ class NewWidget extends Component {
     return this.state.content.length > 0;
   }
 
-  handleChange = (event) => {
+  handleChange = ({ target }) => {
     this.setState({
-      [event.target.id]: event.target.value
+      [target.id]: target.value,
     });
   }
 
-  handleFileChange = (event) => {
-    this.file = event.target.files[0];
+  handleFileChange = ({ target }) => {
+    this.file = target.files[0];
   }
 
   handleSubmit = async (event) => {
     event.preventDefault();
 
     if (this.file && this.file.size > config.MAX_ATTACHMENT_SIZE) {
-      alert('Please pick a file smaller than 5MB');
+      console.error('Please pick a file smaller than 5MB');
+
       return;
     }
 
-    this.setState({ isLoading: true });
+    this.setState({
+      isLoading: true,
+    });
 
     try {
-      const uploadedFilename = (this.file)
+      const uploadedFilename = this.file
         ? (await s3Upload(this.file, this.props.userToken)).Location
         : null;
 
@@ -50,18 +56,22 @@ class NewWidget extends Component {
         content: this.state.content,
         attachment: uploadedFilename,
       });
+
       this.props.history.push('/');
     }
     catch(e) {
-      alert(e);
-      this.setState({ isLoading: false });
+      console.error(e);
+
+      this.setState({
+        isLoading: false
+      });
     }
   }
 
   createWidget(widget) {
     return invokeApig({
-      path: '/widgets',
-      method: 'POST',
+      path: '/',
+      method: 'post',
       body: widget,
     }, this.props.userToken);
   }
@@ -75,7 +85,8 @@ class NewWidget extends Component {
           id="content"
           name="content"
           value={this.state.content}
-          onChange={this.handleChange} />
+          onChange={this.handleChange}
+        />
 
         <label htmlFor="file">Attachment</label>
 
@@ -84,17 +95,20 @@ class NewWidget extends Component {
           name="file"
           type="file"
           value={this.state.file}
-          onChange={this.handleFileChange} />
+          onChange={this.handleFileChange}
+        />
 
         <LoaderButton
-          disabled={!this.validateForm()}
           type="submit"
+          disabled={!this.validateForm()}
           isLoading={this.state.isLoading}
           text="Create"
-          loadingText="Creating…" />
+          loadingText="Creating…"
+        />
       </form>
     );
   }
 }
 
 export default withRouter(NewWidget);
+

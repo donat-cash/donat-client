@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
-import {
-  withRouter,
-} from 'react-router-dom';
 import { CognitoUserPool } from 'amazon-cognito-identity-js';
 import AWS from 'aws-sdk';
+import { withRouter } from 'react-router-dom';
 
 import config from './config.js';
 import Routes from './Routes'
@@ -23,24 +21,30 @@ class App extends Component {
     const currentUser = this.getCurrentUser();
 
     if (currentUser === null) {
-      this.setState({isLoadingUserToken: false});
+      this.setState({
+        isLoadingUserToken: false,
+      });
+
       return;
     }
 
     try {
       const userToken = await this.getUserToken(currentUser);
+
       this.updateUserToken(userToken);
     }
     catch(e) {
-      alert(e);
+      console.error(e);
     }
 
-    this.setState({isLoadingUserToken: false});
+    this.setState({
+      isLoadingUserToken: false,
+    });
   }
 
   updateUserToken = (userToken) => {
     this.setState({
-      userToken: userToken
+      userToken,
     });
   }
 
@@ -62,18 +66,21 @@ class App extends Component {
   getCurrentUser() {
     const userPool = new CognitoUserPool({
       UserPoolId: config.cognito.USER_POOL_ID,
-      ClientId: config.cognito.APP_CLIENT_ID
+      ClientId: config.cognito.APP_CLIENT_ID,
     });
+
     return userPool.getCurrentUser();
-}
+  }
 
   getUserToken(currentUser) {
     return new Promise((resolve, reject) => {
-      currentUser.getSession(function(err, session) {
+      currentUser.getSession((err, session) => {
         if (err) {
             reject(err);
+
             return;
         }
+
         resolve(session.getIdToken().getJwtToken());
       });
     });
@@ -88,12 +95,14 @@ class App extends Component {
     return !this.state.isLoadingUserToken && (
       <div>
         <RouteLink to="/">Home</RouteLink>
-        {this.state.userToken
-          ? <button onClick={this.handleLogout}>Logout</button>
-          : [
-            <RouteLink key={1} to="/signup">Signup</RouteLink>,
-            <RouteLink key={2} to="/login">Login</RouteLink>
-          ]}
+        {
+          this.state.userToken
+            ? <button onClick={this.handleLogout}>Logout</button>
+            : [
+              <RouteLink key={1} to="/signup">Signup</RouteLink>,
+              <RouteLink key={2} to="/login">Login</RouteLink>,
+            ]
+        }
         <Routes childProps={childProps} />
       </div>
     );

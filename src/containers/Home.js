@@ -18,44 +18,48 @@ class Home extends Component {
       return;
     }
 
-    this.setState({ isLoading: true });
+    this.setState({
+      isLoading: true,
+    });
 
     try {
-      const results = await this.widgets();
-      this.setState({ widgets: results });
+      const widgets = await this.widgets();
+
+      this.setState({
+        widgets,
+      });
     }
     catch(e) {
-      alert(e);
+      console.error(e);
     }
 
-    this.setState({ isLoading: false });
+    this.setState({
+      isLoading: false,
+    });
   }
 
   widgets() {
-    return invokeApig({ path: '/widgets' }, this.props.userToken);
+    return invokeApig({
+      path: '/',
+    }, this.props.userToken);
   }
 
   renderWidgetsList(widgets) {
-    return [{}].concat(widgets).map((widget, i) => (
-      i !== 0
-        ? ( <a
-              key={widget.widgetId}
-              href={`/widgets/${widget.widgetId}`}
-              onClick={this.handleWidgetClick}
-              header={widget.content.trim().split('\n')[0]}>
-                { "Created: " + (new Date(widget.createdAt)).toLocaleString() }
-            </a> )
-        : ( <a
-              key="new"
-              href="/widgets/new"
-              onClick={this.handleWidgetClick}>
-                Create a new widget
-            </a> )
+    return widgets.map((widget) => (
+      <li key={widget.widgetId}>
+        <a
+          href={`/widgets/${widget.widgetId}`}
+          onClick={this.handleWidgetClick}
+        >
+          {`Created: ${(new Date(widget.createdAt)).toLocaleString()}`}
+        </a>
+      </li>
     ));
   }
 
   handleWidgetClick = (event) => {
     event.preventDefault();
+
     this.props.history.push(event.currentTarget.getAttribute('href'));
   }
 
@@ -73,8 +77,16 @@ class Home extends Component {
       <div>
         <h1>Your Widgets</h1>
         <ul>
-          { ! this.state.isLoading
-            && this.renderWidgetsList(this.state.widgets) }
+          <li>
+            <a
+              key="new"
+              href="/widgets/new"
+              onClick={this.handleWidgetClick}
+            >
+              Create a new widget
+            </a>
+          </li>
+          {!this.state.isLoading && this.renderWidgetsList(this.state.widgets)}
         </ul>
       </div>
     );
@@ -83,9 +95,11 @@ class Home extends Component {
   render() {
     return (
       <div>
-        { this.props.userToken === null
-          ? this.renderLander()
-          : this.renderWidgets() }
+        {
+          this.props.userToken === null
+            ? this.renderLander()
+            : this.renderWidgets()
+        }
       </div>
     );
   }

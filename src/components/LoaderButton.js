@@ -5,3 +5,4 @@ export default ({ isLoading, text, loadingText, disabled = false, ...props }) =>
     {!isLoading ? text : loadingText}
   </button>
 );
+

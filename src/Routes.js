@@ -1,5 +1,8 @@
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import {
+  Route,
+  Switch,
+} from 'react-router-dom';
 
 import AppliedRoute from './components/AppliedRoute';
 import AuthenticatedRoute from './components/AuthenticatedRoute';
@@ -21,3 +24,4 @@ export default ({ childProps }) => (
     <Route component={NotFound} />
   </Switch>
 );
+

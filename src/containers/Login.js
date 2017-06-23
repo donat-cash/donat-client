@@ -25,9 +25,9 @@ class Login extends Component {
       && this.state.password.length > 0;
   }
 
-  handleChange = (event) => {
+  handleChange = ({ target }) => {
     this.setState({
-      [event.target.id]: event.target.value
+      [target.id]: target.value,
     });
   }
 
@@ -35,7 +35,7 @@ class Login extends Component {
     event.preventDefault();
 
     this.setState({
-      isLoading: true
+      isLoading: true,
     });
 
     try {
@@ -47,7 +47,7 @@ class Login extends Component {
       console.error(e);
 
       this.setState({
-        isLoading: false
+        isLoading: false,
       });
     }
   }
@@ -55,22 +55,24 @@ class Login extends Component {
   login(username, password) {
     const userPool = new CognitoUserPool({
       UserPoolId: config.cognito.USER_POOL_ID,
-      ClientId: config.cognito.APP_CLIENT_ID
+      ClientId: config.cognito.APP_CLIENT_ID,
     });
     const authenticationData = {
       Username: username,
-      Password: password
+      Password: password,
     };
-
-    const user = new CognitoUser({ Username: username, Pool: userPool });
+    const user = new CognitoUser({
+      Username: username,
+      Pool: userPool,
+    });
     const authenticationDetails = new AuthenticationDetails(authenticationData);
 
-    return new Promise((resolve, reject) => (
+    return new Promise((resolve, reject) => {
       user.authenticateUser(authenticationDetails, {
         onSuccess: (result) => resolve(result.getIdToken().getJwtToken()),
         onFailure: (err) => reject(err),
-      })
-    ));
+      });
+    });
   }
 
   render() {
@@ -84,7 +86,8 @@ class Login extends Component {
           name="username"
           type="email"
           value={this.state.username}
-          onChange={this.handleChange} />
+          onChange={this.handleChange}
+        />
 
         <label htmlFor="password">Password</label>
 
@@ -93,17 +96,20 @@ class Login extends Component {
           name="password"
           type="password"
           value={this.state.password}
-          onChange={this.handleChange} />
+          onChange={this.handleChange}
+        />
 
         <LoaderButton
-          disabled={!this.validateForm()}
           type="submit"
+          disabled={!this.validateForm()}
           isLoading={this.state.isLoading}
           text="Login"
-          loadingText="Logging in…" />
+          loadingText="Logging in…"
+        />
       </form>
     );
   }
 }
 
 export default withRouter(Login);
+

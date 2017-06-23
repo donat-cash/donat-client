@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import { withRouter } from 'react-router-dom';
 import {
   AuthenticationDetails,
   CognitoUserPool,
   CognitoUserAttribute,
 } from 'amazon-cognito-identity-js';
+import { withRouter } from 'react-router-dom';
 
 import config from '../config.js';
 import LoaderButton from '../components/LoaderButton';
@@ -33,37 +33,45 @@ class Signup extends Component {
     return this.state.confirmationCode.length > 0;
   }
 
-  handleChange = (event) => {
+  handleChange = ({ target }) => {
     this.setState({
-      [event.target.id]: event.target.value
+      [target.id]: target.value,
     });
   }
 
   handleSubmit = async (event) => {
     event.preventDefault();
 
-    this.setState({ isLoading: true });
+    this.setState({
+      isLoading: true,
+    });
 
     try {
       const newUser = await this.signup(this.state.username, this.state.password);
+
       this.setState({
-        newUser: newUser
+        newUser,
       });
     }
     catch(e) {
-      alert(e);
+      console.error(e);
     }
 
-    this.setState({ isLoading: false });
+    this.setState({
+      isLoading: false,
+    });
   }
 
   handleConfirmationSubmit = async (event) => {
     event.preventDefault();
 
-    this.setState({ isLoading: true });
+    this.setState({
+      isLoading: true,
+    });
 
     try {
       await this.confirm(this.state.newUser, this.state.confirmationCode);
+
       const userToken = await this.authenticate(
         this.state.newUser,
         this.state.username,
@@ -74,40 +82,49 @@ class Signup extends Component {
       this.props.history.push('/');
     }
     catch(e) {
-      alert(e);
-      this.setState({ isLoading: false });
+      console.error(e);
+
+      this.setState({
+        isLoading: false,
+      });
     }
   }
 
   signup(username, password) {
     const userPool = new CognitoUserPool({
       UserPoolId: config.cognito.USER_POOL_ID,
-      ClientId: config.cognito.APP_CLIENT_ID
+      ClientId: config.cognito.APP_CLIENT_ID,
     });
-    const attributeEmail = new CognitoUserAttribute({ Name : 'email', Value : username });
+    const attributeEmail = new CognitoUserAttribute({
+      Name: 'email',
+      Value: username
+    });
 
-    return new Promise((resolve, reject) => (
+    return new Promise((resolve, reject) => {
       userPool.signUp(username, password, [attributeEmail], null, (err, result) => {
         if (err) {
           reject(err);
+
           return;
         }
 
         resolve(result.user);
-      })
-    ));
+      });
+    });
   }
 
   confirm(user, confirmationCode) {
-    return new Promise((resolve, reject) => (
-      user.confirmRegistration(confirmationCode, true, function(err, result) {
+    return new Promise((resolve, reject) => {
+      user.confirmRegistration(confirmationCode, true, (err, result) => {
         if (err) {
           reject(err);
+
           return;
         }
+
         resolve(result);
-      })
-    ));
+      });
+    });
   }
 
   authenticate(user, username, password) {
@@ -117,12 +134,12 @@ class Signup extends Component {
     };
     const authenticationDetails = new AuthenticationDetails(authenticationData);
 
-    return new Promise((resolve, reject) => (
+    return new Promise((resolve, reject) => {
       user.authenticateUser(authenticationDetails, {
         onSuccess: (result) => resolve(result.getIdToken().getJwtToken()),
         onFailure: (err) => reject(err),
-      })
-    ));
+      });
+    });
   }
 
   renderConfirmationForm() {
@@ -137,14 +154,16 @@ class Signup extends Component {
           name="confirmationCode"
           type="tel"
           value={this.state.confirmationCode}
-          onChange={this.handleChange} />
+          onChange={this.handleChange}
+        />
 
         <LoaderButton
-          disabled={!this.validateConfirmationForm()}
           type="submit"
+          disabled={!this.validateConfirmationForm()}
           isLoading={this.state.isLoading}
           text="Verify"
-          loadingText="Verifying…" />
+          loadingText="Verifying…"
+        />
       </form>
     );
   }
@@ -160,7 +179,8 @@ class Signup extends Component {
           name="username"
           type="email"
           value={this.state.username}
-          onChange={this.handleChange} />
+          onChange={this.handleChange}
+        />
 
         <label htmlFor="password">Password</label>
 
@@ -169,7 +189,8 @@ class Signup extends Component {
           name="password"
           type="password"
           value={this.state.password}
-          onChange={this.handleChange} />
+          onChange={this.handleChange}
+        />
 
         <label htmlFor="confirmPassword">Confirm Password</label>
 
@@ -178,14 +199,16 @@ class Signup extends Component {
           name="confirmPassword"
           type="password"
           value={this.state.confirmPassword}
-          onChange={this.handleChange} />
+          onChange={this.handleChange}
+        />
 
         <LoaderButton
-          disabled={!this.validateForm()}
           type="submit"
+          disabled={!this.validateForm()}
           isLoading={this.state.isLoading}
           text="Signup"
-          loadingText="Signing up…" />
+          loadingText="Signing up…"
+        />
       </form>
     );
   }
@@ -193,12 +216,15 @@ class Signup extends Component {
   render() {
     return (
       <div>
-        { this.state.newUser === null
-          ? this.renderForm()
-          : this.renderConfirmationForm() }
+        {
+          this.state.newUser === null
+            ? this.renderForm()
+            : this.renderConfirmationForm()
+        }
       </div>
     );
   }
 }
 
 export default withRouter(Signup);
+
