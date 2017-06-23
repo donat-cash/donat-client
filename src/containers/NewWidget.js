@@ -46,7 +46,7 @@ class NewWidget extends Component {
         ? (await s3Upload(this.file, this.props.userToken)).Location
         : null;
 
-      await this.createNote({
+      await this.createWidget({
         content: this.state.content,
         attachment: uploadedFilename,
       });

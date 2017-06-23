@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import {
   withRouter,
 } from 'react-router-dom';
-import { CognitoUserPool, } from 'amazon-cognito-identity-js';
+import { CognitoUserPool } from 'amazon-cognito-identity-js';
+import AWS from 'aws-sdk';
 
 import config from './config.js';
 import Routes from './Routes'
@@ -48,6 +49,10 @@ class App extends Component {
 
     if (currentUser !== null) {
       currentUser.signOut();
+    }
+
+    if (AWS.config.credentials) {
+      AWS.config.credentials.clearCachedId();
     }
 
     this.updateUserToken(null);

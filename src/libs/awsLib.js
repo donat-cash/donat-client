@@ -22,6 +22,21 @@ export async function invokeApig({ path, method = 'GET', body }, userToken) {
   return results.json();
 };
 
+export function getAwsCredentials(userToken) {
+  const authenticator = `cognito-idp.${config.cognito.REGION}.amazonaws.com/${config.cognito.USER_POOL_ID}`;
+
+  AWS.config.update({ region: config.cognito.REGION });
+
+  AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+    IdentityPoolId: config.cognito.IDENTITY_POOL_ID,
+    Logins: {
+      [authenticator]: userToken
+    }
+  });
+
+  return AWS.config.credentials.getPromise();
+}
+
 export async function s3Upload(file, userToken) {
   await getAwsCredentials(userToken);
 
