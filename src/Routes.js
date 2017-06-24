@@ -7,21 +7,16 @@ import {
 import AppliedRoute from './components/AppliedRoute';
 import AuthenticatedRoute from './components/AuthenticatedRoute';
 import UnauthenticatedRoute from './components/UnauthenticatedRoute';
-import Home from './containers/Home';
-import Login from './containers/Login';
-import Signup from './containers/Signup';
-import NewWidget from './containers/NewWidget';
-import Widgets from './containers/Widgets';
-import NotFound from './containers/NotFound';
+import Async from './components/Async';
 
 export default ({ childProps }) => (
   <Switch>
-    <AppliedRoute path="/" exact component={Home} props={childProps} />
-    <UnauthenticatedRoute path="/login" exact component={Login} props={childProps} />
-    <UnauthenticatedRoute path="/signup" exact component={Signup} props={childProps} />
-    <AuthenticatedRoute path="/widgets/new" exact component={NewWidget} props={childProps} />
-    <AuthenticatedRoute path="/widgets/:id" exact component={Widgets} props={childProps} />
-    <Route component={NotFound} />
+    <AppliedRoute path="/" exact component={Async(() => import('./containers/Home'))} props={childProps} />
+    <UnauthenticatedRoute path="/login" exact component={Async(() => import('./containers/Login'))} props={childProps} />
+    <UnauthenticatedRoute path="/signup" exact component={Async(() => import('./containers/Signup'))} props={childProps} />
+    <AuthenticatedRoute path="/widgets/new" exact component={Async(() => import('./containers/NewWidget'))} props={childProps} />
+    <AuthenticatedRoute path="/widgets/:id" exact component={Async(() => import('./containers/Widgets'))} props={childProps} />
+    <Route component={Async(() => import('./containers/NotFound'))} />
   </Switch>
 );
 
