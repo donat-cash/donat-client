@@ -40,7 +40,7 @@ class Home extends Component {
 
   widgets() {
     return invokeApig({
-      path: '/',
+      path: '/widgets',
     }, this.props.userToken);
   }
 
@@ -52,6 +52,12 @@ class Home extends Component {
           onClick={this.handleWidgetClick}
         >
           {`Created: ${(new Date(widget.createdAt)).toLocaleString()}`}
+        </a>
+        <a
+          href={`/widget/${widget.widgetId}`}
+          onClick={this.handleWidgetClick}
+        >
+          Public
         </a>
       </li>
     ));

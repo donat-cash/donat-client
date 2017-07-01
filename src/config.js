@@ -7,7 +7,7 @@ export default {
     APP_CLIENT_ID : '2c0d97c7ovkcng8cvu7f5q9v8d',
   },
   apiGateway: {
-    URL: 'https://xel1uw5gx1.execute-api.us-west-2.amazonaws.com/prod/widgets',
+    URL: 'https://xel1uw5gx1.execute-api.us-west-2.amazonaws.com/prod',
   },
   s3: {
     BUCKET: 'donat'

@@ -70,7 +70,7 @@ class NewWidget extends Component {
 
   createWidget(widget) {
     return invokeApig({
-      path: '/',
+      path: '/widgets',
       method: 'post',
       body: widget,
     }, this.props.userToken);
