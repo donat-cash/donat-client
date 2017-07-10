@@ -100,7 +100,7 @@ class App extends Component {
             ? <button onClick={this.handleLogout}>Logout</button>
             : [
               <RouteLink key={1} to="/signup">Signup</RouteLink>,
-              <RouteLink key={2} to="/login">Login</RouteLink>,
+              <RouteLink key={2} to="/login">Login</RouteLink>
             ]
         }
         <Routes childProps={childProps} />
