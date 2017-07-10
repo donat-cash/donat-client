@@ -12,6 +12,7 @@ import Async from './components/Async';
 export default ({ childProps }) => (
   <Switch>
     <AppliedRoute path="/" exact component={Async(() => import('./containers/Home'))} props={childProps} />
+    <AppliedRoute path="/widget/:id" exact component={Async(() => import('./containers/Widget'))} props={childProps} />
     <UnauthenticatedRoute path="/login" exact component={Async(() => import('./containers/Login'))} props={childProps} />
     <UnauthenticatedRoute path="/signup" exact component={Async(() => import('./containers/Signup'))} props={childProps} />
     <AppliedRoute path="/pay" exact component={Async(() => import('./containers/Pay'))} props={childProps} />

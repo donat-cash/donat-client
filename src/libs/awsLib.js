@@ -4,14 +4,10 @@ import config from '../config.js';
 
 export async function invokeApig({ path, method = 'get', body }, userToken) {
   const url = `${config.apiGateway.URL}${path}`;
-  const headers = {
-    Authorization: userToken,
-  };
   const stringBody = body ? JSON.stringify(body) : body;
   const results = await fetch(url, {
     method,
     body: stringBody,
-    headers
   });
 
   if (results.status !== 200) {

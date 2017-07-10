@@ -12,11 +12,8 @@ class Widgets extends Component {
   constructor(props) {
     super(props);
 
-    this.file = null;
-
     this.state = {
       widget: null,
-      content: '',
     };
   }
 
@@ -26,7 +23,6 @@ class Widgets extends Component {
 
       this.setState({
         widget,
-        content: widget.content,
       });
     }
     catch(e) {
@@ -36,12 +32,12 @@ class Widgets extends Component {
 
   getWidget() {
     return invokeApig({
-      path: `/${this.props.match.params.id}`,
+      path: `/widgets/${this.props.match.params.id}`,
     }, this.props.userToken);
   }
 
   validateForm() {
-    return this.state.content.length > 0;
+    return this.state.widget && this.state.widget.name && this.state.widget.name.length > 0;
   }
 
   formatFilename(str) {
@@ -56,11 +52,7 @@ class Widgets extends Component {
     });
   }
 
-  handleFileChange = ({ target }) => {
-    this.file = target.files[0];
-  }
-
-  saveNote(widget) {
+  saveWidget(widget) {
     return invokeApig({
       path: `/${this.props.match.params.id}`,
       method: 'put',
@@ -71,21 +63,13 @@ class Widgets extends Component {
   handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (this.file && this.file.size > config.MAX_ATTACHMENT_SIZE) {
-      console.error('Please pick a file smaller than 5MB');
-
-      return;
-    }
-
     this.setState({
       isLoading: true,
     });
 
     try {
-      await this.saveNote({
+      await this.saveWidget({
         ...this.state.note,
-        content: this.state.content,
-        attachment: this.file ? (await s3Upload(this.file, this.props.userToken)).Location : this.state.widget.attachment,
       });
 
       this.props.history.push('/');
@@ -99,7 +83,7 @@ class Widgets extends Component {
     }
   }
 
-  deleteNote() {
+  deleteWidget() {
     return invokeApig({
       path: `/${this.props.match.params.id}`,
       method: 'delete',
@@ -120,7 +104,7 @@ class Widgets extends Component {
     });
 
     try {
-      await this.deleteNote();
+      await this.deleteWidget();
 
       this.props.history.push('/');
     }
@@ -138,35 +122,13 @@ class Widgets extends Component {
       <div>
         {this.state.widget && (
           <form onSubmit={this.handleSubmit}>
-            <label htmlFor="content">Content</label>
+            <label htmlFor="name">Name</label>
 
             <input
-              id="content"
-              name="content"
+              id="name"
+              name="name"
               onChange={this.handleChange}
-              value={this.state.content}
-            />
-
-            {this.state.widget.attachment && (
-              <a
-                target="_blank"
-                rel="noopener noreferrer"
-                href={this.state.widget.attachment}
-              >
-                {this.formatFilename(this.state.widget.attachment)}
-              </a>
-            )}
-
-            {!this.state.widget.attachment && (
-              <label key={1}>Attachment</label>
-            )}
-
-            <input
-              key={2}
-              id="file"
-              name="file"
-              type="file"
-              onChange={this.handleFileChange}
+              value={this.state.widget.name}
             />
 
             <LoaderButton
