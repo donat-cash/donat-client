@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
-import { CognitoUserPool } from 'amazon-cognito-identity-js';
+import React, {Component} from 'react';
+import {CognitoUserPool} from 'amazon-cognito-identity-js';
+import {withRouter} from 'react-router-dom';
 import AWS from 'aws-sdk';
-import { withRouter } from 'react-router-dom';
 
 import config from './config.js';
 import Routes from './Routes'
@@ -93,14 +93,14 @@ class App extends Component {
     };
 
     return !this.state.isLoadingUserToken && (
-      <div>
+      <div id="root-inner">
         <RouteLink to="/">Home</RouteLink>
         {
           this.state.userToken
             ? <button onClick={this.handleLogout}>Logout</button>
             : [
               <RouteLink key={1} to="/signup">Signup</RouteLink>,
-              <RouteLink key={2} to="/login">Login</RouteLink>,
+              <RouteLink key={2} to="/login">Login</RouteLink>
             ]
         }
         <Routes childProps={childProps} />
