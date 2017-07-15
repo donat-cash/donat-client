@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
-import { withRouter } from 'react-router-dom';
+import {
+  Link,
+  withRouter,
+} from 'react-router-dom';
 
 import { invokeApig } from '../libs/awsLib';
 
@@ -47,26 +50,14 @@ class Home extends Component {
   renderWidgetsList(widgets) {
     return widgets.map((widget) => (
       <li key={widget.widgetId}>
-        <a
-          href={`/widgets/${widget.widgetId}`}
-          onClick={this.handleWidgetClick}
-        >
-          {`Created: ${(new Date(widget.createdAt)).toLocaleString()}`}
-        </a>
-        <a
-          href={`/widget/${widget.widgetId}`}
-          onClick={this.handleWidgetClick}
-        >
-          Public
-        </a>
+        <Link to={`/widgets/${widget.widgetId}`}>
+          {widget.name}
+        </Link>
+        <Link to={`/widget/${widget.widgetId}`}>
+          Public link
+        </Link>
       </li>
     ));
-  }
-
-  handleWidgetClick = (event) => {
-    event.preventDefault();
-
-    this.props.history.push(event.currentTarget.getAttribute('href'));
   }
 
   renderLander() {
@@ -82,16 +73,10 @@ class Home extends Component {
     return (
       <div>
         <h1>Your Widgets</h1>
+        <Link to="/widgets/new">
+          Create a new widget
+        </Link>
         <ul>
-          <li>
-            <a
-              key="new"
-              href="/widgets/new"
-              onClick={this.handleWidgetClick}
-            >
-              Create a new widget
-            </a>
-          </li>
           {!this.state.isLoading && this.renderWidgetsList(this.state.widgets)}
         </ul>
       </div>

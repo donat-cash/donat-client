@@ -16,12 +16,12 @@ class NewWidget extends Component {
 
     this.state = {
       isLoading: null,
-      content: '',
+      name: '',
     };
   }
 
   validateForm() {
-    return this.state.content.length > 0;
+    return this.state.name.length > 0;
   }
 
   handleChange = ({ target }) => {
@@ -53,7 +53,7 @@ class NewWidget extends Component {
         : null;
 
       await this.createWidget({
-        content: this.state.content,
+        name: this.state.name,
         attachment: uploadedFilename,
       });
 
@@ -79,16 +79,16 @@ class NewWidget extends Component {
   render() {
     return (
       <form onSubmit={this.handleSubmit}>
-        <label htmlFor="content">Text</label>
+        <label htmlFor="name">Name</label>
 
         <input
-          id="content"
-          name="content"
-          value={this.state.content}
+          id="name"
+          name="name"
+          value={this.state.name}
           onChange={this.handleChange}
         />
 
-        <label htmlFor="file">Attachment</label>
+        <label htmlFor="file">Background</label>
 
         <input
           id="file"
