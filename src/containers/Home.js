@@ -13,6 +13,7 @@ class Home extends Component {
     this.state = {
       isLoading: false,
       widgets: [],
+      pages: [],
     };
   }
 
@@ -36,15 +37,45 @@ class Home extends Component {
       console.error(e);
     }
 
+    try {
+      const pages = await this.pages();
+
+      this.setState({
+        pages,
+      });
+    }
+    catch(e) {
+      console.error(e);
+    }
+
     this.setState({
       isLoading: false,
     });
+  }
+
+  pages() {
+    return invokeApig({
+      path: '/pages',
+    }, this.props.userToken);
   }
 
   widgets() {
     return invokeApig({
       path: '/widgets',
     }, this.props.userToken);
+  }
+
+  renderPagesList(pages) {
+    return pages.map((page) => (
+      <li key={page.pageId}>
+        <Link to={`/pages/${page.pageId}`}>
+          {page.name}
+        </Link>
+        <Link to={`/page/${page.pageId}`}>
+          Public link
+        </Link>
+      </li>
+    ));
   }
 
   renderWidgetsList(widgets) {
@@ -69,9 +100,23 @@ class Home extends Component {
     );
   }
 
+  renderPages() {
+    return (
+      <div key={1}>
+        <h1>Your Pages</h1>
+        <Link to="/pages/new">
+          Create a new page
+        </Link>
+        <ul>
+          {!this.state.isLoading && this.renderPagesList(this.state.pages)}
+        </ul>
+      </div>
+    );
+  }
+
   renderWidgets() {
     return (
-      <div>
+      <div key={2}>
         <h1>Your Widgets</h1>
         <Link to="/widgets/new">
           Create a new widget
@@ -89,7 +134,10 @@ class Home extends Component {
         {
           this.props.userToken === null
             ? this.renderLander()
-            : this.renderWidgets()
+            : [
+              this.renderPages(),
+              this.renderWidgets(),
+            ]
         }
       </div>
     );

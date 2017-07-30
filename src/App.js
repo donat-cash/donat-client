@@ -91,17 +91,26 @@ class App extends Component {
       userToken: this.state.userToken,
       updateUserToken: this.updateUserToken,
     };
+    const mainPath = this.props.location.pathname.split('/')[1];
+    const pathToHideNavbar = ['page', 'widget'];
+    const isNavbarHidden = pathToHideNavbar.some(path => path === mainPath);
 
     return !this.state.isLoadingUserToken && (
       <div id="root-inner">
-        <RouteLink to="/">Home</RouteLink>
         {
-          this.state.userToken
-            ? <button onClick={this.handleLogout}>Logout</button>
-            : [
-              <RouteLink key={1} to="/signup">Signup</RouteLink>,
-              <RouteLink key={2} to="/login">Login</RouteLink>
-            ]
+          isNavbarHidden
+            ? null
+            : <div>
+              <RouteLink to="/">Home</RouteLink>
+              {
+                this.state.userToken
+                  ? <button onClick={this.handleLogout}>Logout</button>
+                  : [
+                    <RouteLink key={1} to="/signup">Signup</RouteLink>,
+                    <RouteLink key={2} to="/login">Login</RouteLink>
+                  ]
+              }
+            </div>
         }
         <Routes childProps={childProps} />
       </div>
