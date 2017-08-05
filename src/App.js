@@ -1,116 +1,72 @@
-import React, {Component} from 'react';
-import {CognitoUserPool} from 'amazon-cognito-identity-js';
-import {withRouter} from 'react-router-dom';
-import AWS from 'aws-sdk';
+import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
 
 import config from './config.js';
 import Routes from './Routes'
-import RouteLink from './components/RouteLink';
+import { invokeApig } from './libs/awsLib';
 
 class App extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      userToken: null,
-      isLoadingUserToken: true,
+      accessToken: null,
     };
   }
 
   async componentDidMount() {
-    const currentUser = this.getCurrentUser();
+    const searchParams = this.props.location.search.split('?')[1] || '';
+    const getParams = searchParams.split('=').reduce((result, value, key, array) => key % 2 === 0 ? Object.assign({}, result, {
+      [value]: array[key + 1],
+    }) : result, {});
+    const { yandexMoney } = config;
 
-    if (currentUser === null) {
+    if (getParams.code !== undefined) {
       this.setState({
-        isLoadingUserToken: false,
+        isLoading: true,
       });
 
-      return;
-    }
+      try {
+        const response = await fetch(`https://money.yandex.ru/oauth/token?code=${getParams.code}&client_id=${yandexMoney.clientId}&redirect_uri=${yandexMoney.redirectURI}&grant_type=authorization_code`, {
+          method: 'post',
+          mode: 'no-cors'
+        });
+        console.log(response)
 
-    try {
-      const userToken = await this.getUserToken(currentUser);
+        this.setState({
+          accessToken: response.accessToken,
+        });
+      }
+      catch(e) {
+        console.error(e);
 
-      this.updateUserToken(userToken);
+        this.setState({
+          isLoading: false,
+        });
+      }
     }
-    catch(e) {
-      console.error(e);
-    }
+  }
 
+  handleLogout = () => {
     this.setState({
-      isLoadingUserToken: false,
-    });
-  }
-
-  updateUserToken = (userToken) => {
-    this.setState({
-      userToken,
-    });
-  }
-
-  handleLogout = (event) => {
-    const currentUser = this.getCurrentUser();
-
-    if (currentUser !== null) {
-      currentUser.signOut();
-    }
-
-    if (AWS.config.credentials) {
-      AWS.config.credentials.clearCachedId();
-    }
-
-    this.updateUserToken(null);
-    this.props.history.push('/login');
-  }
-
-  getCurrentUser() {
-    const userPool = new CognitoUserPool({
-      UserPoolId: config.cognito.USER_POOL_ID,
-      ClientId: config.cognito.APP_CLIENT_ID,
-    });
-
-    return userPool.getCurrentUser();
-  }
-
-  getUserToken(currentUser) {
-    return new Promise((resolve, reject) => {
-      currentUser.getSession((err, session) => {
-        if (err) {
-            reject(err);
-
-            return;
-        }
-
-        resolve(session.getIdToken().getJwtToken());
-      });
+      accessToken: null,
     });
   }
 
   render() {
     const childProps = {
-      userToken: this.state.userToken,
-      updateUserToken: this.updateUserToken,
+      accessToken: this.state.accessToken,
     };
-    const mainPath = this.props.location.pathname.split('/')[1];
-    const pathToHideNavbar = ['page', 'widget'];
-    const isNavbarHidden = pathToHideNavbar.some(path => path === mainPath);
+    const { yandexMoney } = config;
 
-    return !this.state.isLoadingUserToken && (
-      <div id="root-inner">
+    return (
+      <div>
         {
-          isNavbarHidden
-            ? null
-            : <div>
-              <RouteLink to="/">Home</RouteLink>
-              {
-                this.state.userToken
-                  ? <button onClick={this.handleLogout}>Logout</button>
-                  : [
-                    <RouteLink key={1} to="/signup">Signup</RouteLink>,
-                    <RouteLink key={2} to="/login">Login</RouteLink>
-                  ]
-              }
-            </div>
+          this.props.match.path === '/'
+            ? this.state.accessToken
+              ? <button onClick={this.handleLogout}>Logout</button>
+              : <a href={`https://money.yandex.ru/oauth/authorize?client_id=${yandexMoney.clientId}&redirect_uri=${yandexMoney.redirectURI}&response_type=code&scope=account-info operation-history`}>Auth</a>
+            : null
         }
         <Routes childProps={childProps} />
       </div>

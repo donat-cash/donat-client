@@ -13,12 +13,11 @@ class Home extends Component {
     this.state = {
       isLoading: false,
       widgets: [],
-      pages: [],
     };
   }
 
   async componentDidMount() {
-    if (this.props.userToken === null) {
+    if (this.props.accessToken === null) {
       return;
     }
 
@@ -37,45 +36,15 @@ class Home extends Component {
       console.error(e);
     }
 
-    try {
-      const pages = await this.pages();
-
-      this.setState({
-        pages,
-      });
-    }
-    catch(e) {
-      console.error(e);
-    }
-
     this.setState({
       isLoading: false,
     });
   }
 
-  pages() {
-    return invokeApig({
-      path: '/pages',
-    }, this.props.userToken);
-  }
-
   widgets() {
     return invokeApig({
       path: '/widgets',
-    }, this.props.userToken);
-  }
-
-  renderPagesList(pages) {
-    return pages.map((page) => (
-      <li key={page.pageId}>
-        <Link to={`/pages/${page.pageId}`}>
-          {page.name}
-        </Link>
-        <Link to={`/page/${page.pageId}`}>
-          Public link
-        </Link>
-      </li>
-    ));
+    }, this.props.accessToken);
   }
 
   renderWidgetsList(widgets) {
@@ -83,9 +52,6 @@ class Home extends Component {
       <li key={widget.widgetId}>
         <Link to={`/widgets/${widget.widgetId}`}>
           {widget.name}
-        </Link>
-        <Link to={`/widget/${widget.widgetId}`}>
-          Public link
         </Link>
       </li>
     ));
@@ -95,34 +61,33 @@ class Home extends Component {
     return (
       <div>
         <h1>Donat</h1>
+
         <p>A simple widgets for donation</p>
       </div>
     );
   }
 
-  renderPages() {
+  renderSettings() {
     return (
-      <div key={1}>
-        <h1>Your Pages</h1>
-        <Link to="/pages/new">
-          Create a new page
-        </Link>
-        <ul>
-          {!this.state.isLoading && this.renderPagesList(this.state.pages)}
-        </ul>
-      </div>
-    );
-  }
+      <div>
+        <h1>Settings</h1>
 
-  renderWidgets() {
-    return (
-      <div key={2}>
-        <h1>Your Widgets</h1>
+        <p>
+          <Link to={`/users/${this.props.userId}`}>Your donation page</Link>
+        </p>
+
+        <h2>Your Widgets</h2>
+
         <Link to="/widgets/new">
           Create a new widget
         </Link>
+
         <ul>
-          {!this.state.isLoading && this.renderWidgetsList(this.state.widgets)}
+          {
+            this.state.isLoading
+              ? <li>Loading</li>
+              : this.renderWidgetsList(this.state.widgets)
+          }
         </ul>
       </div>
     );
@@ -132,12 +97,9 @@ class Home extends Component {
     return (
       <div>
         {
-          this.props.userToken === null
+          this.props.accessToken === null
             ? this.renderLander()
-            : [
-              this.renderPages(),
-              this.renderWidgets(),
-            ]
+            : this.renderSettings()
         }
       </div>
     );
